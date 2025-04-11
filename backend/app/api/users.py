@@ -4,12 +4,37 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+from app.models.company import Company
+from app.models.email import Email
 from app.schemas.user import User as UserSchema, UserUpdate
 from app.db.session import get_db
 from app.utils.security import get_current_user, get_current_active_admin
 import app.crud.user as crud_user
+import app.crud.email as crud_email
 
 router = APIRouter()
+
+@router.get("/stats", response_model=dict)
+def get_user_stats(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Any:
+    """Get user usage statistics."""
+    company_count = db.query(Company).filter(Company.owner_id == current_user.id).count()
+    email_count_today = crud_email.get_user_emails_today(db=db, user_id=current_user.id)
+    
+    return {
+        "companies": {
+            "used": company_count,
+            "total": current_user.max_companies,
+            "remaining": current_user.max_companies - company_count
+        },
+        "emails": {
+            "used_today": email_count_today,
+            "total_per_day": current_user.max_emails_per_day,
+            "remaining_today": current_user.max_emails_per_day - email_count_today
+        }
+    }
 
 @router.get("/me", response_model=UserSchema)
 def read_user_me(
@@ -81,3 +106,4 @@ def update_user(
         )
     user = crud_user.update(db, db_obj=user, obj_in=user_in)
     return user
+

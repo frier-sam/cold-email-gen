@@ -43,10 +43,9 @@ def create(db: Session, *, obj_in: CompanyCreate, owner_id: int) -> Company:
     # Convert services to JSON string if provided
     services_json = None
     if obj_in.services:
-        if isinstance(obj_in.services, list):
-            services_json = json.dumps(obj_in.services)
-        else:
-            services_json = obj_in.services
+        # Convert Pydantic models to dictionaries first
+        services_dicts = [service.dict() for service in obj_in.services]
+        services_json = json.dumps(services_dicts)
         
     db_obj = Company(
         name=obj_in.name,

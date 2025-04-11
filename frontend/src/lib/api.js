@@ -5,6 +5,27 @@ const API_URL = "http://localhost:8000/api";
 /**
  * Generic fetch function with authentication
  */
+
+export const tasks = {
+  generateEmails: async (data) => {
+    return fetchAPI("/tasks/generate-emails", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  
+  getStatus: async (taskId) => {
+    return fetchAPI(`/tasks/status/${taskId}`);
+  },
+  
+  saveEmail: async (data) => {
+    return fetchAPI("/tasks/save-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 const fetchAPI = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
   
@@ -72,6 +93,17 @@ export const auth = {
   getCurrentUser: async () => {
     return fetchAPI("/users/me");
   },
+  
+};
+/**
+ * User API calls
+ */
+export const users = {
+  // ... existing methods
+  
+  getStats: async () => {
+    return fetchAPI("/users/stats");
+  },
 };
 
 /**
@@ -130,5 +162,8 @@ export const emails = {
     return fetchAPI(`/emails/${id}`, {
       method: "DELETE",
     });
+  },
+  getByCompany: async (companyId) => {
+    return fetchAPI(`/emails/company/${companyId}`);
   },
 };

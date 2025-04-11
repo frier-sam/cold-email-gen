@@ -1,3 +1,4 @@
+// frontend/src/app.jsx (updated routes)
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { authUtils } from './lib/utils';
 
@@ -15,16 +16,16 @@ import { Dashboard } from './components/dashboard/Dashboard';
 // Companies
 import { CompanyList } from './components/companies/CompanyList';
 import { CompanyForm } from './components/companies/CompanyForm';
+import { CompanyDetail } from './components/companies/CompanyDetail';
 
 // Emails
-import { EmailGenerator } from './components/emails/EmailGenerator';
+import { EnhancedEmailGenerator } from './components/emails/EnhancedEmailGenerator';
 import { EmailList } from './components/emails/EmailList';
 
 export default function App() {
   return (
     <Router>
       <Routes>
-       <Route path="/test" element={<div>Test Route Works!</div>} />
         {/* Public routes */}
         <Route 
           path="/login" 
@@ -67,16 +68,16 @@ export default function App() {
           <Route path="companies" element={<CompanyList />} />
           <Route path="companies/new" element={<CompanyForm />} />
           <Route path="companies/:id/edit" element={<CompanyForm />} />
+          <Route path="companies/:id" element={<CompanyDetail />} />
+          <Route path="companies/:id/generate" element={<EnhancedEmailGenerator />} />
           
           {/* Email routes */}
           <Route path="emails" element={<EmailList />} />
-          <Route path="email-generator" element={<EmailGenerator />} />
         </Route>
         
         {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
 }
-

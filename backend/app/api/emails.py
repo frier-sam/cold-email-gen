@@ -17,6 +17,8 @@ from app.utils.email_generator import generate_cold_email
 from app.utils.web_scraper import extract_company_info
 import app.crud.company as crud_company
 import app.crud.email as crud_email
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -160,3 +162,28 @@ def delete_email(
     return_email = email
     crud_email.delete(db=db, email_id=email_id)
     return return_email
+
+@router.get("/company/{company_id}", response_model=List[EmailPreview])
+def get_emails_by_company(
+    company_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    """
+    Get emails by company ID.
+    """
+    # First, check if the company exists and belongs to the user
+    company = crud_company.get(db=db, company_id=company_id)
+    if not company or company.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Company not found or you don't have access to it"
+        )
+    
+    # Get emails for this company
+    emails = crud_email.get_by_company(db=db, company_id=company_id)
+    
+    # Log how many emails were found
+    logger.info(f"Found {len(emails)} emails for company_id {company_id}")
+    
+    return emails

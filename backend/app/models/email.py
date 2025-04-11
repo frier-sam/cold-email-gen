@@ -13,7 +13,8 @@ class Email(Base):
     content = Column(Text)
     target_company_name = Column(String)
     target_company_website = Column(String)
-    additional_websites = Column(JSON, nullable=True)  # Array of additional URLs
+    additional_websites = Column(JSON, nullable=True)  # This should be Text or JSON
+    contact_info = Column(JSON, nullable=True)  # This should be Text or JSON
     custom_instructions = Column(Text, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     company_id = Column(Integer, ForeignKey("companies.id"))

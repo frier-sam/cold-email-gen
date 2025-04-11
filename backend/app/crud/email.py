@@ -71,3 +71,48 @@ def delete(db: Session, *, email_id: int) -> None:
     if email:
         db.delete(email)
         db.commit()
+
+def get_by_company(
+    db: Session, *, company_id: int, skip: int = 0, limit: int = 100
+) -> List[Email]:
+    """Get emails by company ID."""
+    return (
+        db.query(Email)
+        .filter(Email.company_id == company_id)
+        .order_by(Email.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+def save_generated_email(
+    db: Session,
+    *,
+    user_id: int,
+    company_id: int,
+    target_company_name: str,
+    target_company_website: str,
+    subject: str,
+    content: str,
+    contact_info: Optional[Dict[str, Any]] = None,
+    custom_instructions: Optional[str] = None
+) -> Email:
+    """Save a generated email to the database."""
+    contact_info_json = None
+    if contact_info:
+        contact_info_json = json.dumps(contact_info)
+    
+    db_obj = Email(
+        subject=subject,
+        content=content,
+        target_company_name=target_company_name,
+        target_company_website=target_company_website,
+        contact_info=contact_info_json,
+        custom_instructions=custom_instructions,
+        user_id=user_id,
+        company_id=company_id,
+    )
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
